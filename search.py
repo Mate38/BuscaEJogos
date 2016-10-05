@@ -177,39 +177,45 @@ def iterative_recursive_deepening(actual_state, max_depth, problem, path, visite
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    start = problem.getStartState()
-    visitedNodes = set()
-    myPriorityQueue = util.PriorityQueue() # Use Priority Queue for A*
-    frontier = myPriorityQueue
-    # Add starting state, empty list and cost value on to stack. Initialize Priority
-    frontier.push((start, list(), 0), 0)
-    # While there is still a frontier do this
-    while frontier: 
-        successor, action, stepCost = frontier.pop()
-        # If we reach our Goal state, then return the action taken to get there
-        if not problem.isGoalState(successor):
-            pass
-        if problem.isGoalState(successor):
-            return action
-        if successor not in visitedNodes:
-            # If the location is not in the visited set, then add it to it
-            visitedNodes.add(successor)
-            for newSuccessor, newAction, newStepCost in problem.getSuccessors(successor):
-                if newSuccessor not in visitedNodes:
-                    # Estimate cost solve problem
-                    findHeuristic = heuristic(newSuccessor, problem)
-                    # Calculate previous step plus the new step
-                    goBack = newStepCost + stepCost
-                    # Calculate cost of going back plus estimated cost of solving problem
-                    combinedCost = goBack + findHeuristic
-                    # Push the new information onto the stack and add new action to the list
-                    # This time calculate the total cost of the steps to go back
-                    # Priority Queue will search for the lowest of the combined costs first
-                    frontier.push((newSuccessor, action + [newAction], goBack), combinedCost)
-        if successor in visitedNodes:
-            pass
-    return list() # Return an empty list
+    state = problem.getStartState()
 
+    moves = util.Stack()
+
+    visited = util.Stack()
+
+    nodes = util.PriorityQueue()
+
+    start_cost = heuristic(state, problem)
+
+    while True:
+
+        visited.push(state)
+
+        if problem.goalTest(state) == True:
+            break
+
+        actions = problem.getActions(state)
+
+        for i in range(0, len(actions)):
+            
+            aux = list(moves.list)
+
+            aux.append(actions[i])
+
+            result = problem.getResult(state, actions[i])
+
+            cost = (heuristic(result, problem) + problem.getCost(state, actions[i])) + (start_cost - heuristic(state, problem))
+            
+            nodes.push((result, cost, aux), cost)
+
+        while nodes.isEmpty() != True:
+
+            (state, start_cost, moves.list) = nodes.pop()
+
+            if state not in visited.list:
+                break
+
+    return moves.list
 
 # Abbreviations
 bfs = breadthFirstSearch
