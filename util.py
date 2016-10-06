@@ -206,6 +206,14 @@ def manhattanDistance( xy1, xy2 ):
     "Returns the Manhattan distance between points xy1 and xy2"
     return abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )
 
+def euclideanDistance( xy1, xy2 ):
+    "Returns the Euclidean distance between points xy1 and xy2"
+    return ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
+
+def mateusDistance( xy1, xy2 ):
+    "Retorna com expansao de apenas 174 nos porem acusa como inconsistente"
+    return ((abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )) + (( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5))
+
 """
   Data structures and functions useful for various course projects
 
