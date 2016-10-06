@@ -181,6 +181,7 @@ class PositionSearchProblem(search.SearchProblem):
         self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
 
     def getStartState(self):
+
         return self.startState
 
     def goalTest(self, state):
@@ -193,37 +194,9 @@ class PositionSearchProblem(search.SearchProblem):
             if '_display' in dir(__main__):
                 if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
                     __main__._display.drawExpandedCells(self._visitedlist) #@UndefinedVariable
-
+        
         return isGoal
-    
-    def getSuccessors(self, state):
-        """
-        Returns successor states, the actions they require, and a cost of 1.
-         As noted in search.py:
-             For a given state, this should return a list of triples,
-         (successor, action, stepCost), where 'successor' is a
-         successor to the current state, 'action' is the action
-         required to get there, and 'stepCost' is the incremental
-         cost of expanding to that successor
-        """
 
-        successors = []
-        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            x,y = state
-            dx, dy = Actions.directionToVector(action)
-            nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
-                nextState = (nextx, nexty)
-                cost = self.costFn(nextState)
-                successors.append( ( nextState, action, cost) )
-
-        # Bookkeeping for display purposes
-        self._expanded += 1 # DO NOT CHANGE
-        if state not in self._visited:
-            self._visited[state] = True
-            self._visitedlist.append(state)
-
-        return successors
     def getActions(self, state):
         """
         Given a state, returns available actions.
@@ -333,14 +306,22 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        return (self.startingPosition, ())
+
+        #util.raiseNotDefined()
 
     def goalTest(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        comidos = list(state[1])
+
+        return len(self.corners) == len(comidos)
+
+        #util.raiseNotDefined()
 
     def getActions(self, state):
         """
@@ -362,7 +343,7 @@ class CornersProblem(search.SearchProblem):
         Given a state and an action, returns resulting state 
         """
         # Expanded count is in getActions()
-        
+
         # Add a successor state to the successor list if the action is legal
         # Here's a code snippet for figuring out whether a new position hits a wall:
         #   x,y = currentPosition
@@ -371,6 +352,28 @@ class CornersProblem(search.SearchProblem):
         #   hitsWall = self.walls[nextx][nexty]
 
         "*** YOUR CODE HERE ***"
+
+        x,y = state[0]
+        comidos = list(state[1])
+
+        dx, dy = Actions.directionToVector(action)
+        nextx, nexty = int(x + dx), int(y + dy)
+
+        if not self.walls[nextx][nexty]:
+
+            nextState = (nextx, nexty)
+
+            if nextState in self.corners and nextState not in comidos:
+
+                comidos.append(nextState)
+
+                return (nextState, comidos)
+
+            else:
+                return (nextState, comidos)
+        else:
+            warnings.warn("Warning: checking the result of an invalid state, action pair.")
+            return state
 
     def getCost(self, state, action):
         """Given a state and an action, returns a cost of 1, which is
