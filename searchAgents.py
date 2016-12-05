@@ -414,6 +414,17 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
     "*** YOUR CODE HERE ***"
 
+    """
+    comidas = corners
+
+    distancia = 0
+
+    for no in comidas:
+        distancia = min( distancia, util.manhattanDistance(state[0], no) )
+
+    return distancia
+    """
+
     visitados = state[1]
     nao_visitados = []
 
@@ -558,6 +569,8 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
 
+    #print problem.walls
+
     comidas = foodGrid.asList()
 
     distancia = 0
@@ -568,7 +581,28 @@ def foodHeuristic(state, problem):
         #distancia = max( distancia, util.mateusDistance(position, no) )
 
     return distancia
+    
+    """ REOLVE O mediumSearch em 1.5s
+    visitados = state[1]
+    nao_visitados = []
 
+    for comida in comidas:
+        if comida not in visitados:
+            nao_visitados.append(comida)
+
+    posicao = state[0]
+    custo = 0
+
+    while len(nao_visitados) != 0:
+        distancia, comida = max((util.manhattanDistance(posicao, comida), comida) for comida in nao_visitados)
+        #distancia, comida = max((util.euclideanDistance(posicao, comida), comida) for comida in nao_visitados)
+        #distancia, comida = max((util.mateusDistance(posicao, comida), comida) for comida in nao_visitados)
+        custo += distancia
+        posicao = comida
+        nao_visitados.remove(comida)
+
+    return custo
+    """
     #util.pause()
 
     #return 0

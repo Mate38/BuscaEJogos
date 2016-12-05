@@ -12,6 +12,8 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+#atualizado 04-12 rafael vidal
+
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -74,7 +76,42 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+
+        #newScaredTime marca contagem regressiva para acabar o tempo que pode comer o fantasma
+
+        pontos = 0
+        
+        for ghost in newGhostStates:
+          distancia = manhattanDistance(ghost.getPosition(), newPos)
+
+          if distancia <= 1:
+
+            if ghost.scaredTimer > 0:
+              pontos += ghost.scaredTimer
+            else:
+              pontos -= 1
+          else:
+            pontos += 1
+
+        for x in range(0, newFood.width):
+          for y in range(0, newFood.height):
+
+            if newFood[x][y] == True:
+              distancia = manhattanDistance((x,y), newPos)
+
+              if distancia == 0:
+                pontos += 1
+              else:
+                pontos -= 1
+            else:
+              pontos += 1
+
+        #print pontos
+        return pontos
+
+        #print successorGameState.getScore()
+
+        #return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -129,7 +166,37 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        bestScore,bestMove=self.maxFunction(gameState,self.depth)
+
+        return bestMove
+
+    def maxFunction(self,gameState,depth):
+        if depth==0 or gameState.isWin() or gameState.isLose():
+          return self.evaluationFunction(gameState), "noMove"
+
+        moves=gameState.getLegalActions()
+        scores = [self.minFunction(gameState.generateSuccessor(self.index,move),1, depth) for move in moves]
+        bestScore=max(scores)
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = bestIndices[0]
+        return bestScore,moves[chosenIndex]
+
+    def minFunction(self,gameState,agent, depth):  
+        if depth==0 or gameState.isWin() or gameState.isLose():
+          return self.evaluationFunction(gameState), "noMove"
+        moves=gameState.getLegalActions(agent) #get legal actions.
+        scores=[]
+        if(agent!=gameState.getNumAgents()-1):
+          scores =[self.minFunction(gameState.generateSuccessor(agent,move),agent+1,depth) for move in moves]
+        else:
+          scores =[self.maxFunction(gameState.generateSuccessor(agent,move),(depth-1))[0] for move in moves]
+        minScore=min(scores)
+        worstIndices = [index for index in range(len(scores)) if scores[index] == minScore]
+        chosenIndex = worstIndices[0]
+        return minScore, moves[chosenIndex]
+
+        #util.raiseNotDefined()"""
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -144,7 +211,35 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        return self.getActionHelper(gameState, self.depth, 0)[1]
+
+    def getActionHelper(self, gameState, depth, agentIndex):
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            eval_result = self.evaluationFunction(gameState)
+            return (eval_result, '')
+        else:
+            if agentIndex == gameState.getNumAgents() - 1:
+                depth -= 1
+            if agentIndex == 0:
+                maxAlpha = -99999999
+            else:
+                maxAlpha = 0
+            maxAction = ''
+            nextAgentIndex = (agentIndex + 1) % gameState.getNumAgents()
+            actions = gameState.getLegalActions(agentIndex)
+            for action in actions:
+                result = self.getActionHelper(gameState.generateSuccessor(agentIndex, action), depth, nextAgentIndex)
+                if agentIndex == 0:
+                    if result[0] > maxAlpha:
+                        maxAlpha = result[0]
+                        maxAction = action
+                else:
+                    maxAlpha += 1.0/len(actions) * result[0]
+                    maxAction = action
+            return (maxAlpha, maxAction)
+
+        #util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -154,7 +249,31 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    evalNum = 0
+    pacmanPosition = currentGameState.getPacmanPosition()
+    foodPositions = currentGameState.getFood().asList()
+    minDistance = 10000
+    setMinDistance = False
+    for foodPosition in foodPositions:
+        foodDistance = util.manhattanDistance(pacmanPosition, foodPosition)
+        if foodDistance < minDistance:
+            minDistance = foodDistance
+            setMinDistance = True
+    if setMinDistance:
+        evalNum += minDistance
+    evalNum += 1000*currentGameState.getNumFood()
+    evalNum += 10*len(currentGameState.getCapsules())
+    ghostPositions = currentGameState.getGhostPositions()
+    for ghostPosition in ghostPositions:
+        ghostDistance = util.manhattanDistance(pacmanPosition, ghostPosition)
+        if ghostDistance < 2:
+            evalNum = 9999999999999999
+    evalNum -= 10*currentGameState.getScore()
+    # print("min distance: " + str(minDistance) + " num food: " + str(len(foodPositions)) + " eval num: " + str(evalNum*(-1)))
+    return evalNum*(-1)
+
+    #util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
